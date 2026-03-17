@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Lịch sử phân loại</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="container">
+    <a href="/" style="text-decoration:none;">⬅ Quay lại</a>
+
+    <h1>📜 Lịch sử phân loại</h1>
+
+    {% if history %}
+    <table>
+        <tr>
+            <th>Ảnh</th>
+            <th>Kết quả</th>
+            <th>Độ tin cậy</th>
+            <th>Thời gian</th>
+            <th>Thao tác</th>
+        </tr>
+
+        {% for h in history %}
+        <tr>
+            <td>
+                <img src="{{ url_for('static', filename='uploads/' + h.filename) }}" width="100">
+            </td>
+            <td>
+                {% if h.label == "Chó" %}
+                    🐶 {{ h.label }}
+                {% elif h.label == "Mèo" %}
+                    🐱 {{ h.label }}
+                {% else %}
+                    ❓ {{ h.label }}
+                {% endif %}
+            </td>
+            <td>{{ h.confidence }}%</td>
+            <td>{{ h.time }}</td>
+            <td>
+                <form method="POST" action="/delete/{{ loop.index0 }}"
+                      onsubmit="return confirm('Bạn có chắc muốn xóa không?');">
+                    <button type="submit" class="delete-btn">❌ Xóa</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+        <p>Chưa có lịch sử nào.</p>
+    {% endif %}
+</div>
+
+</body>
+</html>

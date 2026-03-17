@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Phân loại Chó / Mèo</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <h1>🐶 🐱 Ứng dụng phân loại Chó / Mèo</h1>
+
+    <!-- NÚT XEM LỊCH SỬ -->
+    <div class="top-actions">
+        <a href="/history" class="history-btn">📜 Trang lịch sử</a>
+    </div>
+
+    <!-- FORM UPLOAD -->
+    <form method="POST" enctype="multipart/form-data">
+        <input type="file" name="images" multiple required>
+        <button type="submit">📊 Phân loại</button>
+    </form>
+
+    <!-- KẾT QUẢ VỪA PHÂN LOẠI -->
+    {% if results %}
+    <h2>✅ Kết quả vừa phân loại</h2>
+    <table>
+        <tr>
+            <th>Ảnh</th>
+            <th>Kết quả</th>
+            <th>Độ tin cậy</th>
+            <th>Thời gian</th>
+        </tr>
+
+        {% for r in results %}
+        <tr>
+            <td>
+                <img src="{{ url_for('static', filename='uploads/' + r.filename) }}" width="120">
+            </td>
+            <td>{{ r.label }}</td>
+            <td>{{ r.confidence }}%</td>
+            <td>{{ r.time }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+
+    <!-- LỊCH SỬ -->
+    {% if history %}
+
+    <!-- BIỂU ĐỒ -->
+    <h2 style="margin-top:40px;">📊 Biểu đồ độ tin cậy</h2>
+    <canvas id="chart"></canvas>
+    {% endif %}
+</div>
+
+{% if history %}
+<script>
+const rawLabels = [{% for h in history %}"{{ h.filename }}",{% endfor %}];
+const rawData = [{% for h in history %}{{ h.confidence }},{% endfor %}];
+
+// 🔥 LỌC: chỉ giữ confidence >= 70
+const labels = [];
+const data = [];
+
+for (let i = 0; i < rawData.length; i++) {
+    if (rawData[i] >= 70) {
+        labels.push(rawLabels[i]);
+        data.push(rawData[i]);
+    }
+}
+
+new Chart(document.getElementById('chart'), {
+    type: 'bar',
+    data: {
+        labels: labels,
+        datasets: [{
+            label: 'Độ tin cậy (%)',
+            data: data,
+            borderRadius: 8
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: 100
+            }
+        }
+    }
+});
+</script>
+
+{% endif %}
+
+</body>
+</html>
